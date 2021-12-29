@@ -78,10 +78,10 @@
 
 最终测试数据为 Le2i Fall detection 的视频
 
-+ 精度指标定义：
++ 精度指标定义（预测正确的帧数除以视频有标签的总帧数）：
 
 
-https://latex.codecogs.com/gif.image?\dpi{110}&space;\frac{视频中动作预测正确的帧数总和}{视频中有人的帧数总和}&space;>=&space;90\%
+![y等于x的平方](https://latex.codecogs.com/svg.image?\frac{correctly\,predicted\,frames}{total\,frames\,with\,label\,in\,video}\geq 90\%)
 
 ### 3.2 实时性指标
 
