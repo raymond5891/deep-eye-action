@@ -81,9 +81,7 @@
 + 精度指标定义：
 
 
-```text
-![](http://latex.codecogs.com/svg.latex?\frac{视频中动作预测正确的帧数总和}{视频中有人的帧数总和} >= 90\%)
-```
+https://latex.codecogs.com/svg.image?\frac{视频中动作预测正确的帧数总和}{视频中有人的帧数总和}&space;>=&space;90\%" title="\frac{视频中动作预测正确的帧数总和}{视频中有人的帧数总和} >= 90\%
 
 ### 3.2 实时性指标
 
