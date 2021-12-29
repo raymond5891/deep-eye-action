@@ -81,7 +81,7 @@
 + 精度指标定义（预测正确的帧数除以视频有标签的总帧数）：
 
 
-![y等于x的平方](https://latex.codecogs.com/svg.image?\frac{correctly\,predicted\,frames}{total\,frames\,with\,label\,in\,video}\geq 90\%)
+<img src="imgs/ap.png" alt="ap" style="zoom:50%;" />
 
 ### 3.2 实时性指标
 
