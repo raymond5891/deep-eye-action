@@ -1,0 +1,6 @@
+epochs: 36
+batch_size: 4
+n_cpu: 4
+n_gpu: '0'
+data_root_dir: '/home/raymond/workspace/data/VOC/VOCdevkit/VOC2012'
+#data_root_dir: '/home/featurize/data/VOCdevkit2012/VOC2012'
