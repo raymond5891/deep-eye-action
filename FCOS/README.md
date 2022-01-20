@@ -63,8 +63,8 @@ python detect_video.py \
 + model_path:  pytorch model to be tested
 + test_video: 
 + save_path: save path of result (empty by default, in which case the result will not be saved)
-+ video_frame_width: 
-+ video_frame_height: 
++ video_frame_width: width of frames in test video
++ video_frame_height: height of frames in test video
 
 Note: 
 
