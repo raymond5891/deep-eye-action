@@ -41,6 +41,25 @@ Note:
 
 First, install requirements following guide below. 
 
+* Inference images
+
+```shell
+#!/bin/bash
+
+MODEL='/home/raymond/workspace/deep-eye/6th/detection/FCOS_mosaic/mosaic_training_dir/model_mosaic.pth'
+TEST_PATH='./tests/test_images'
+SAVE_PATH='./tests/results'
+
+python detect.py \
+	--model_path ${MODEL} \
+	--test_path ${TEST_PATH} \
+	--save_path ${SAVE_PATH} \
+```
+
++ model_path:  pytorch model to be tested
++ test_path: save path of result (empty by default, in which case the result will not be saved)
++ save_path: save path of result (empty by default, in which case the result will not be saved)
+
 * Inference video 
 
 ```shell
@@ -61,7 +80,7 @@ python detect_video.py \
 ```
 
 + model_path:  pytorch model to be tested
-+ test_video: 
++ test_video: video to be tested
 + save_path: save path of result (empty by default, in which case the result will not be saved)
 + video_frame_width: width of frames in test video
 + video_frame_height: height of frames in test video
