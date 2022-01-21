@@ -20,7 +20,8 @@ class FCOS(nn.Module):
         if config.backbone == "resnet50":
             self.backbone = resnet50(pretrained=config.pretrained)
         elif config.backbone == "darknet19":
-            self.backbone = Darknet19(pretrained=config.pretrained)
+            self.backbone = Darknet19(pretrained=config.pretrained, 
+                                      pretrained_backbone=config.pretrained_backbone)
 
         self.fpn = FPN(config.fpn_out_channels,
                        use_p5=config.use_p5,

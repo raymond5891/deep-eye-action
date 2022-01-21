@@ -48,7 +48,7 @@ class Darknet19(nn.Module):
     Darknet19 模型
     """
 
-    def __init__(self, in_channels=3, batch_norm=True, pretrained=False):
+    def __init__(self, in_channels=3, batch_norm=True, pretrained=False, pretrained_backbone=''):
         """
         模型结构初始化
         :param in_channels: 输入数据的通道数  (input pic`s channel.)
@@ -63,7 +63,7 @@ class Darknet19(nn.Module):
         self.block3 = make_layers(cfg3, in_channels=cfg2[-1], batch_norm=batch_norm, flag=False)
         # 导入预训练模型或初始化
         if pretrained:
-            self.load_weight()
+            self.load_weight(pretrained_backbone)
         else:
             self._initialize_weights()
 
@@ -84,9 +84,8 @@ class Darknet19(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def load_weight(self):
-        #weight_file = '/home/featurize/workspace/1_FCOS/FCOS/weight/darknet19-deepBakSu-e1b3ec1e.pth'
-        weight_file = '/home/raymond/workspace/deep-eye/6th/detection/FCOS/pretrained/darknet19.pth'
+    def load_weight(self, weight_file):
+        #weight_file = '/home/raymond/workspace/deep-eye/6th/detection/FCOS/pretrained/darknet19.pth'
         dic = {}
         for now_keys, values in zip(self.state_dict().keys(), torch.load(weight_file).values()):
             dic[now_keys] = values

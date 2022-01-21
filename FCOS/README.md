@@ -1,6 +1,6 @@
 # FCOS Person Falling Detector
 
-<img src="results/view.gif" alt="view" style="zoom:150%;" />
+<img src="tests/results/view.gif" alt="view" style="zoom:150%;" />
 
 ****
 ## Benchmarks

@@ -7,6 +7,14 @@ from dataset.VOC_dataset import VOCDataset
 import time
 from model.config import DefaultConfig
 
+import argparse
+parser = argparse.ArgumentParser(description='detect video')
+parser.add_argument('--model_path', default="./mosaic_training_dir/model_mosaic.pth", help="path to your test model")
+parser.add_argument('--test_path', default="./tests/test_images/", help="path to your test video")
+parser.add_argument('--save_path', type=str, default="./tests/results", help="path to your save path")
+
+args = parser.parse_args()
+
 def preprocess_img(image,input_ksize):
     '''
     resize image and bboxes
@@ -53,15 +61,17 @@ if __name__=="__main__":
 
     model=FCOSDetector(mode="inference",config=DefaultConfig).cuda()
     model = torch.nn.DataParallel(model)
-    model.load_state_dict(torch.load("./training_dir/model_24.pth",map_location=torch.device('cpu')))
+    #model.load_state_dict(torch.load("./training_dir/model_24.pth",map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(args.model_path,map_location=torch.device('cpu')))
     
     model=model.eval()
     print("===>success loading model")
 
-    root="./test_images/"
+    root=args.test_path
     names=os.listdir(root)
     for name in names:
-        img_bgr = cv2.imread(root + name)
+        img_path = os.path.join(root, name)
+        img_bgr = cv2.imread(img_path)
         img_pad = preprocess_img(img_bgr, [640,800])
         img = cv2.cvtColor(img_pad.copy(), cv2.COLOR_BGR2RGB)
         img1 = transforms.ToTensor()(img)
@@ -81,10 +91,12 @@ if __name__=="__main__":
         for i, box in enumerate(boxes):
             pt1 = (int(box[0]), int(box[1]))
             pt2 = (int(box[2]), int(box[3]))
-            cv2.rectangle(img_pad, pt1, pt2, (0,255,0))
-            cv2.putText(img_pad, "%s %.3f"%(VOCDataset.CLASSES_NAME[int(classes[i])],scores[i]), (int(box[0]), int(box[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255))
+            cv2.rectangle(img_pad, pt1, pt2, (0,255,0), 2)
+            cv2.putText(img_pad, "%s %.3f"%(VOCDataset.CLASSES_NAME[int(classes[i])],scores[i]), (int(box[0]), int(box[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255),2)
             print(VOCDataset.CLASSES_NAME[int(classes[i])], scores[i])
         
         cv2.imshow('img', img_pad)
+        if args.save_path:
+            cv2.imwrite(os.path.join(args.save_path, name), img_pad)
         cv2.waitKey(0)
 

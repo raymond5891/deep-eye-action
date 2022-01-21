@@ -9,7 +9,6 @@ from model.config import DefaultConfig
 import argparse
 
 parser = argparse.ArgumentParser(description='detect video')
-parser.add_argument('--lr', default=None, help='learning rate', type=float)
 parser.add_argument('--video_frame_width', help='frame width of tested video', type=int)
 parser.add_argument('--video_frame_height', help='frame height of tested video', type=int)
 parser.add_argument('--model_path', default="./mosaic_training_dir/model_mosaic.pth", help="path to your test model")

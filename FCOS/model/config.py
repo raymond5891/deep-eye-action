@@ -10,8 +10,7 @@ class DefaultConfig():
     #std = [0.226, 0.221, 0.221]
 
     pretrained = True
-    #pretrained = False
-    pre_model = '/home/raymond/workspace/deep-eye/6th/detection/FCOS_mosaic/training_dir/model_24.pth'
+    pretrained_backbone='/home/raymond/workspace/deep-eye/6th/detection/FCOS/pretrained/backbone/darknet19.pth'
 
     # fpn
     fpn_out_channels = 256
@@ -29,6 +28,6 @@ class DefaultConfig():
     limit_range = [[-1, 64], [64, 128], [128, 256], [256, 512], [512, 999999]]
 
     # inference
-    score_threshold = 0.05
+    score_threshold = 0.5
     nms_iou_threshold = 0.5
     max_detection_boxes_num = 150
