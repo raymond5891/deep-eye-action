@@ -41,7 +41,7 @@ Note:
 
 First, install requirements following guide below. 
 
-* Inference images
+* **Inference images**
 
 ```shell
 #!/bin/bash
@@ -60,7 +60,7 @@ python detect.py \
 + test_path: save path of result (empty by default, in which case the result will not be saved)
 + save_path: save path of result (empty by default, in which case the result will not be saved)
 
-* Inference video 
+* **Inference video**
 
 ```shell
 #!/bin/bash
