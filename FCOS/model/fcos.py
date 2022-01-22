@@ -10,6 +10,7 @@ from .backbone.resnet import resnet50
 from .loss import GenTargets,LOSS,coords_fmap2orig
 from .config import DefaultConfig
 from .backbone.darknet19 import Darknet19
+from .backbone.shufflenetv2 import ShuffleNetV2
 
 class FCOS(nn.Module):
 
@@ -22,6 +23,8 @@ class FCOS(nn.Module):
         elif config.backbone == "darknet19":
             self.backbone = Darknet19(pretrained=config.pretrained, 
                                       pretrained_backbone=config.pretrained_backbone)
+        elif config.backbone == "shufflenetv2":
+            self.backbone = ShuffleNetV2(model_size='1.0x')
 
         self.fpn = FPN(config.fpn_out_channels,
                        use_p5=config.use_p5,

@@ -1,7 +1,8 @@
 # 直接执行此代码，定义网络的默认配置
 class DefaultConfig():
     # backbone
-    backbone="darknet19"
+    #backbone="darknet19"
+    backbone="shufflenetv2"
     mean = [0.5, 0.5, 0.5]
     std = [1., 1., 1.]
 

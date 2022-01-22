@@ -69,6 +69,11 @@ class FPN(nn.Module):
             self.prj_5 = nn.Conv2d(717, features, kernel_size=1)  # 不改变特征图的尺寸
             self.prj_4 = nn.Conv2d(358, features, kernel_size=1)
             self.prj_3 = nn.Conv2d(179, features, kernel_size=1)
+        elif backbone == "shufflenetv2":
+            print("INFO: using shufflenetv2 backbone")
+            self.prj_5 = nn.Conv2d(464, features, kernel_size=1)  # 不改变特征图的尺寸
+            self.prj_4 = nn.Conv2d(232, features, kernel_size=1)
+            self.prj_3 = nn.Conv2d(116, features, kernel_size=1)
         else:
             raise ValueError("arg 'backbone' only support 'resnet50' or 'darknet19'")
 

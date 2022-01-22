@@ -137,7 +137,7 @@ if __name__=="__main__":
     model=FCOSDetector(mode="inference")
     model = torch.nn.DataParallel(model)
     #model.load_state_dict(torch.load("./baseline/baseline.pth", map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load("./mosaic_training_dir/model_mosaic.pth", map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load("./training_dir/model_36.pth", map_location=torch.device('cpu')))
     model=model.cuda().eval()
     print("===>success loading model")
 

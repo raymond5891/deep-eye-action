@@ -67,8 +67,10 @@ class VOCDataset(torch.utils.data.Dataset):
         print("INFO=====>voc dataset init finished  ! !")
 
         ### mosaic 
-        #self.mosaic=True
         self.mosaic=False
+        if is_train:
+            self.mosaic=True
+            print(f'training with Mosaic Augment')
         self.mosaic_border = [-resize_size[0]// 2, -resize_size[0]// 2]
         self.indices=range(len(self.img_ids))
 
