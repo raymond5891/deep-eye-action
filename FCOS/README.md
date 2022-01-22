@@ -5,10 +5,11 @@
 ****
 ## Benchmarks
 
-Resolution          |Mosaic|VOC-person mAP |Model Size |Epochs 
-:-------------:|:--------:|:-------:|:--------------------:|:----------:
-640*640      | - |   76.24%   | 107M      |36 
-640*640      | √ |   **81.18% <font color='red'>(+4.94)</font>**   | 107M          |36 
+Resolution          |Backbone|Mosaic |VOC-person mAP |Model Size |Epochs 
+:-------------:|:--------:|:-------:|:--------------------:|:----------:|:-------------:
+640*640      | Darknet-19 |   -   | 76.24% |107M |36 
+640*640      | Darknet-19 |   √   | **81.18% <font color='red'>(+4.94)</font>** |107M |36 
+640*640 | Shufflenetv2 | √ | 63.10% |34M |36 
 
 Note:
 
@@ -112,7 +113,7 @@ Note:
 ## TODO
 
 - [x] Mosaic Augment
-
+- [x] ShuffleNetv2
 - [ ] GIOU
 - [ ] MultiScale Training
 - [ ] Cosine Learing Rate Strategy
