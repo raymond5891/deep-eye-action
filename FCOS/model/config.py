@@ -1,8 +1,8 @@
 # 直接执行此代码，定义网络的默认配置
 class DefaultConfig():
     # backbone
-    #backbone="darknet19"
-    backbone="shufflenetv2"
+    backbone="darknet19"
+    #backbone="shufflenetv2"
     mean = [0.5, 0.5, 0.5]
     std = [1., 1., 1.]
 
@@ -12,13 +12,16 @@ class DefaultConfig():
 
     pretrained = True
     pretrained_backbone='/home/raymond/workspace/deep-eye/6th/detection/FCOS/pretrained/backbone/darknet19.pth'
+    #pre_model = '/home/raymond/workspace/github/deep-eye-action/FCOS/training_dir/model_70.pth'
+    pre_model = '/home/raymond/workspace/github/deep-eye-action/FCOS/training_dir_before/model_3.pth'
 
     # fpn
     fpn_out_channels = 256
     use_p5 = True
 
     # head
-    class_num = 20
+    class_num = 1
+    #class_num = 20
     use_GN_head = True
     prior = 0.01
     add_centerness = True

@@ -22,6 +22,11 @@ def flip(img, boxes):
 class VOCDataset(torch.utils.data.Dataset):
     CLASSES_NAME = (
         "__background__ ",
+        "person",
+    )
+    '''
+    CLASSES_NAME = (
+        "__background__ ",
         "aeroplane",
         "bicycle",
         "bird",
@@ -43,6 +48,8 @@ class VOCDataset(torch.utils.data.Dataset):
         "train",
         "tvmonitor",
     )
+    '''
+
     def __init__(self,root_dir,resize_size=[640,800],split='trainval',use_difficult=False,is_train=True, augment=None, mean=[0.5,0.5,0.5], std=[1.,1.,1.]):
         self.root=root_dir
         self.use_difficult=use_difficult
@@ -68,9 +75,9 @@ class VOCDataset(torch.utils.data.Dataset):
 
         ### mosaic 
         self.mosaic=False
-        if is_train:
-            self.mosaic=True
-            print(f'training with Mosaic Augment')
+        #if is_train:
+        #    self.mosaic=True
+        #    print(f'training with Mosaic Augment')
         self.mosaic_border = [-resize_size[0]// 2, -resize_size[0]// 2]
         self.indices=range(len(self.img_ids))
 
@@ -85,11 +92,12 @@ class VOCDataset(torch.utils.data.Dataset):
             img, boxes=self.preprocess_img_boxes(img,boxes,self.resize_size)
 
         #self.visualize(img, boxes)
+        orig_img = img.copy()
         img=transforms.ToTensor()(img)
         boxes=torch.from_numpy(boxes)
         classes=torch.LongTensor(classes)
 
-        return img,boxes,classes
+        return img,boxes,classes, orig_img
 
     def get_single_img(self,index):
 
@@ -202,18 +210,6 @@ class VOCDataset(torch.utils.data.Dataset):
             # Labels
             labels = np.array(labels)
 
-            '''
-            if labels.size:
-                y = np.copy(labels)
-
-                y[:, 0] = labels[:, 0] + padw  # top left x
-                y[:, 1] = labels[:, 1] + padh  # top left y
-                y[:, 2] = labels[:, 2] + padw  # bottom right x
-                y[:, 3] = labels[:, 3] + padh  # bottom right y
-
-            labels4.append(y)
-            '''
-
             for l in labels:
                 y = [0] * 4
                 if l[0] == l[2] or l[1] == l[3]:
@@ -233,7 +229,8 @@ class VOCDataset(torch.utils.data.Dataset):
         labels4=np.array(labels4,dtype=np.float32)
 
         img4, labels4 = random_perspective(img4, labels4, border=self.mosaic_border)
-        classes4 = np.array([15] * len(labels4))
+        #classes4 = np.array([15] * len(labels4))
+        classes4 = np.array([1] * len(labels4))
 
         return img4, labels4, classes4
 
@@ -266,10 +263,11 @@ class VOCDataset(torch.utils.data.Dataset):
         else:
             boxes[:, [0, 2]] = boxes[:, [0, 2]] * scale
             boxes[:, [1, 3]] = boxes[:, [1, 3]] * scale
+            #print(f'boxes.shape: {boxes.shape}')
             return image_paded, boxes
 
     def collate_fn(self,data):
-        imgs_list,boxes_list,classes_list=zip(*data)
+        imgs_list,boxes_list,classes_list,orig_img=zip(*data)
         assert len(imgs_list)==len(boxes_list)==len(classes_list)
         batch_size=len(boxes_list)
         pad_imgs_list=[]
@@ -290,15 +288,26 @@ class VOCDataset(torch.utils.data.Dataset):
             n=boxes_list[i].shape[0]
             if n>max_num:max_num=n
         for i in range(batch_size):
-            pad_boxes_list.append(torch.nn.functional.pad(boxes_list[i],(0,0,0,max_num-boxes_list[i].shape[0]),value=-1))
-            pad_classes_list.append(torch.nn.functional.pad(classes_list[i],(0,max_num-classes_list[i].shape[0]),value=-1))
-
+            ###### raymond
+            if boxes_list[i].dim() < 2:
+                print(f'type(boxes_list[i]): {type(boxes_list[i])}')
+                print(f'boxes_list[i].shape: {boxes_list[i].shape}')
+                print(f'boxes_list[i]: {boxes_list[i]}')
+                print(f'classes_list[i].shape: {classes_list[i].shape}')
+                print(f'classes_list[i]: {classes_list[i]}')
+                #boxes_list[i] = torch.zeros(1,4)-1
+                #classes_list[i] = torch.zeros(1)-1
+                pad_boxes_list.append(torch.nn.functional.pad(torch.zeros(1,4, dtype=torch.long)-1, (0,0,0,max_num-1),value=-1))
+                pad_classes_list.append(torch.nn.functional.pad(torch.zeros(1, dtype=torch.long)-1, (0,max_num-1),value=-1))
+            else:
+                pad_boxes_list.append(torch.nn.functional.pad(boxes_list[i],(0,0,0,max_num-boxes_list[i].shape[0]),value=-1))
+                pad_classes_list.append(torch.nn.functional.pad(classes_list[i],(0,max_num-classes_list[i].shape[0]),value=-1))
 
         batch_boxes=torch.stack(pad_boxes_list)
         batch_classes=torch.stack(pad_classes_list)
         batch_imgs=torch.stack(pad_imgs_list)
 
-        return batch_imgs,batch_boxes,batch_classes
+        return batch_imgs,batch_boxes,batch_classes,orig_img
 
 
 if __name__=="__main__":

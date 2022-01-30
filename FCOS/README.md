@@ -5,11 +5,12 @@
 ****
 ## Benchmarks
 
-Resolution          |Backbone|Mosaic |VOC-person mAP |Model Size |Epochs 
-:-------------:|:--------:|:-------:|:--------------------:|:----------:|:-------------:
-640*640      | Darknet-19 |   -   | 76.24% |107M |36 
-640*640      | Darknet-19 |   √   | **81.18% <font color='red'>(+4.94)</font>** |107M |36 
-640*640 | Shufflenetv2 | √ | 63.10% |34M |36 
+Resolution          |Backbone|Mosaic |Dynamic Assigner |VOC-person mAP 
+:-------------:|:--------:|:-------:|:--------------------:|:----------:
+640*640      | Darknet-19 |   -   | - |74.73% 
+640*640      | Darknet-19 |   -   | Y |**77.56% <font color='red'>(+2.83)</font>** 
+640*640 | Darknet-19 | Y | Y |**80.72% <font color='red'>(+3.16)</font>** 
+640*640 | Shufflenetv2 | Y | - |63.10% 
 
 Note:
 
@@ -113,8 +114,10 @@ Note:
 ## TODO
 
 - [x] Mosaic Augment
+- [x] Dynamic Assigner
+- [x] Cosine Learing Rate Strategy
+- [x] GIOU
 - [x] ShuffleNetv2
-- [ ] GIOU
+- [ ] Ghost-PAN
 - [ ] MultiScale Training
-- [ ] Cosine Learing Rate Strategy
 - [ ] IoU branch

@@ -122,6 +122,39 @@ def eval_ap_2d(gt_boxes, gt_labels, pred_boxes, pred_labels, pred_scores, iou_th
         # print(recall, precision)
     return all_ap
 
+def eval(model, eval_loader, eval_dataset):
+
+    model=model.eval()
+
+    gt_boxes=[]
+    gt_classes=[]
+    pred_boxes=[]
+    pred_classes=[]
+    pred_scores=[]
+    num=0
+    for img,boxes,classes, orig_img in eval_loader:
+        with torch.no_grad():
+            out=model(img.cuda(), mode='inference')
+            pred_boxes.append(out[2][0].cpu().numpy())
+            pred_classes.append(out[1][0].cpu().numpy())
+            pred_scores.append(out[0][0].cpu().numpy())
+        gt_boxes.append(boxes[0].numpy())
+        gt_classes.append(classes[0].numpy())
+        num+=1
+        print(num,end='\r')
+
+    pred_boxes,pred_classes,pred_scores=sort_by_score(pred_boxes,pred_classes,pred_scores)
+    all_AP=eval_ap_2d(gt_boxes,gt_classes,pred_boxes,pred_classes,pred_scores,0.5,len(eval_dataset.CLASSES_NAME))
+    print("all classes AP=====>\n")
+    for key,value in all_AP.items():
+        print('ap for {} is {}'.format(eval_dataset.id2name[int(key)],value))
+    mAP=0.
+    for class_id,class_mAP in all_AP.items():
+        mAP+=float(class_mAP)
+    mAP/=(len(eval_dataset.CLASSES_NAME)-1)
+    print("mAP=====>%.3f\n"%mAP)
+
+
 if __name__=="__main__":
     from model.fcos import FCOSDetector
     from dataset.VOC_dataset import VOCDataset
@@ -137,7 +170,8 @@ if __name__=="__main__":
     model=FCOSDetector(mode="inference")
     model = torch.nn.DataParallel(model)
     #model.load_state_dict(torch.load("./baseline/baseline.pth", map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load("./training_dir/model_36.pth", map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load("./training_dir_1/model_50.pth", map_location=torch.device('cuda')))
+    #model.load_state_dict(torch.load("./training_dir_before/model_5.pth", map_location=torch.device('cpu')))
     model=model.cuda().eval()
     print("===>success loading model")
 
@@ -147,9 +181,9 @@ if __name__=="__main__":
     pred_classes=[]
     pred_scores=[]
     num=0
-    for img,boxes,classes in eval_loader:
+    for img,boxes,classes, orig_img in eval_loader:
         with torch.no_grad():
-            out=model(img.cuda())
+            out=model(img.cuda(), mode='inference')
             pred_boxes.append(out[2][0].cpu().numpy())
             pred_classes.append(out[1][0].cpu().numpy())
             pred_scores.append(out[0][0].cpu().numpy())

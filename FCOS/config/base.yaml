@@ -1,6 +1,7 @@
-epochs: 36
+epochs: 72
 batch_size: 8
 n_cpu: 4
 n_gpu: '0'
 data_root_dir: '/home/raymond/workspace/data/VOC/VOCdevkit/VOC2012'
 #data_root_dir: '/home/featurize/data/VOCdevkit2012/VOC2012'
+val_epoch: 5

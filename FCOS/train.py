@@ -10,6 +10,8 @@ import random
 import torch.backends.cudnn as cudnn
 import argparse
 from model.config import DefaultConfig
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from eval import eval
 
 def parse_config():
     parser = argparse.ArgumentParser()
@@ -32,6 +34,11 @@ def main(opt):
     transform = Transforms()
     config = DefaultConfig
     train_dataset = VOCDataset(root_dir=opt['data_root_dir'], resize_size=[640,640], split='person_trainval',use_difficult=False,is_train=True,augment=transform, mean=config.mean,std=config.std)
+    eval_dataset = VOCDataset(root_dir='/home/raymond/workspace/data/VOC/VOCdevkit/VOC2007', resize_size=[640, 640],
+                               split='person_test', use_difficult=False, is_train=False, augment=None, mean=config.mean, std=config.std)
+
+    print("INFO===>training dataset has %d imgs"%len(train_dataset))
+    print("INFO===>eval dataset has %d imgs"%len(eval_dataset))
 
     model = FCOSDetector(mode="training").cuda()
     model = torch.nn.DataParallel(model)
@@ -42,37 +49,51 @@ def main(opt):
 
     BATCH_SIZE = opt['batch_size']
     EPOCHS = opt['epochs']
+    VAL_EPOCHS = opt['val_epoch']
     #WARMPUP_STEPS_RATIO = 0.12
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,
                                             collate_fn=train_dataset.collate_fn,
                                             num_workers=opt['n_cpu'], worker_init_fn=np.random.seed(0))
-    print("total_images : {}".format(len(train_dataset)))
+    eval_loader=torch.utils.data.DataLoader(eval_dataset,batch_size=1,shuffle=False,collate_fn=eval_dataset.collate_fn)
+
     steps_per_epoch = len(train_dataset) // BATCH_SIZE
     TOTAL_STEPS = steps_per_epoch * EPOCHS
     WARMPUP_STEPS = 501
 
     GLOBAL_STEPS = 1
     LR_INIT = 1e-3
+
+    #optimizer = torch.optim.AdamW(model.parameters(),lr=LR_INIT, weight_decay=0.05)
     optimizer = torch.optim.SGD(model.parameters(),lr=LR_INIT,momentum=0.9,weight_decay=1e-4)
+    scheduler = CosineAnnealingLR(optimizer,T_max=EPOCHS, eta_min=0.00005)
 
     model.train()
-
     print(model)
 
     for epoch in range(EPOCHS):
+        if epoch > 0:
+            scheduler.last_epoch = epoch - 1
+            if epoch%VAL_EPOCHS==0:
+                print(f"===>evaluate at epoch : {epoch}")
+                eval(model, eval_loader, eval_dataset)
+                model.train()
+
         for epoch_step, data in enumerate(train_loader):
 
-            batch_imgs, batch_boxes, batch_classes = data
+            batch_imgs, batch_boxes, batch_classes, orig_img = data
             if batch_classes.shape[1] == 0: continue
             batch_imgs = batch_imgs.cuda()
             batch_boxes = batch_boxes.cuda()
             batch_classes = batch_classes.cuda()
 
-            #lr = lr_func()
             if GLOBAL_STEPS < WARMPUP_STEPS:
                 lr = float(GLOBAL_STEPS / WARMPUP_STEPS * LR_INIT)
-            for param in optimizer.param_groups:
-                param['lr'] = lr
+                for param in optimizer.param_groups:
+                    param['lr'] = lr
+            else:
+                lr = scheduler.get_last_lr()[0]
+                
+            '''
             if GLOBAL_STEPS == int(TOTAL_STEPS*0.667):
                 lr = LR_INIT * 0.1
             for param in optimizer.param_groups:
@@ -81,10 +102,11 @@ def main(opt):
                 lr = LR_INIT * 0.01
             for param in optimizer.param_groups:
                 param['lr'] = lr
-            start_time = time.time()
+            '''
 
+            start_time = time.time()
             optimizer.zero_grad()
-            losses = model([batch_imgs, batch_boxes, batch_classes])
+            losses = model([batch_imgs, batch_boxes, batch_classes, orig_img])
             loss = losses[-1]
             loss.mean().backward()
 
@@ -98,8 +120,12 @@ def main(opt):
                     (GLOBAL_STEPS, epoch + 1, epoch_step + 1, steps_per_epoch, losses[0].mean(), losses[1].mean(),
                     losses[2].mean(), cost_time, lr, loss.mean()))
             GLOBAL_STEPS += 1
+
+        ### epoch end
+        scheduler.step()
         torch.save(model.state_dict(),
             os.path.join(output_dir, "model_{}.pth".format(epoch + 1)))
+
         
 if __name__ == '__main__':
     opt = parse_config()

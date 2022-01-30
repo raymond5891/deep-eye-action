@@ -4,7 +4,8 @@ MODEL='/home/raymond/workspace/deep-eye/6th/detection/FCOS_mosaic/mosaic_trainin
 TEST_PATH='./tests/test_images'
 SAVE_PATH='./tests/results'
 
-python detect.py \
+#python detect.py \
+python -m pdb detect.py \
 	--model_path ${MODEL} \
 	--test_path ${TEST_PATH} \
 	--save_path ${SAVE_PATH} \

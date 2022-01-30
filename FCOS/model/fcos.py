@@ -7,7 +7,7 @@ import math
 from .head import ClsCntRegHead
 from .fpn_neck import FPN
 from .backbone.resnet import resnet50
-from .loss import GenTargets,LOSS,coords_fmap2orig
+from .loss import GenTargets,GenDynamicTargets,LOSS,coords_fmap2orig
 from .config import DefaultConfig
 from .backbone.darknet19 import Darknet19
 from .backbone.shufflenetv2 import ShuffleNetV2
@@ -227,25 +227,35 @@ class FCOSDetector(nn.Module):
             config=DefaultConfig
         self.mode=mode
         self.fcos_body=FCOS(config=config)
+        '''
         if mode=="training":
-            self.target_layer=GenTargets(strides=config.strides,limit_range=config.limit_range)
+            #self.target_layer=GenTargets(strides=config.strides,limit_range=config.limit_range)
+            self.target_layer=GenDynamicTargets(strides=config.strides, limit_range=config.limit_range)
             self.loss_layer=LOSS()
         elif mode=="inference":
             self.detection_head=DetectHead(config.score_threshold,config.nms_iou_threshold,
                                             config.max_detection_boxes_num,config.strides,config)
             self.clip_boxes=ClipBoxes()
+        '''
+        self.target_layer=GenTargets(strides=config.strides,limit_range=config.limit_range)
+        #self.target_layer=GenDynamicTargets(strides=config.strides, limit_range=config.limit_range)
+        self.loss_layer=LOSS()
+        self.detection_head=DetectHead(config.score_threshold,config.nms_iou_threshold,
+                                       config.max_detection_boxes_num,config.strides,config)
+        self.clip_boxes=ClipBoxes()
 
-    def forward(self,inputs):
+    def forward(self,inputs,mode='training'):
         '''
         inputs
         [training] list  batch_imgs,batch_boxes,batch_classes
         [inference] img
         '''
 
+        self.mode = mode
         if self.mode=="training":
-            batch_imgs,batch_boxes,batch_classes=inputs
+            batch_imgs,batch_boxes,batch_classes,orig_img=inputs
             out=self.fcos_body(batch_imgs)
-            targets=self.target_layer([out,batch_boxes,batch_classes])
+            targets=self.target_layer([out,batch_boxes,batch_classes, orig_img])
             losses=self.loss_layer([out,targets])
             return losses
         elif self.mode=="inference":
